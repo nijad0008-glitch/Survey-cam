@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Survey Cam</title>
+<meta name="theme-color" content="#3a9fc9">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+
+<style>
+:root{--bg:#fff;--tx:#1b1b1b;--mu:#9aa5ab;--ac:#3a9fc9;--tl:#0d8f79;--bd:#dce6eb;--on:#dedede;--dg:#c62828;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121618;--tx:#e6eaec;--mu:#7c8a91;--ac:#6cc3e6;--tl:#2fbfa4;--bd:#2b383e;--on:#2a3338;--dg:#ff8a80}}
+:root[data-theme="dark"]{--bg:#121618;--tx:#e6eaec;--mu:#7c8a91;--ac:#6cc3e6;--tl:#2fbfa4;--bd:#2b383e;--on:#2a3338;--dg:#ff8a80}
+*{box-sizing:border-box}[hidden]{display:none!important}html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font:18px/1.35 Roboto,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+svg{display:block;fill:currentColor}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;align-items:center;gap:14px;height:62px;padding:0 14px;background:var(--bg);box-shadow:0 1px 4px rgba(0,0,0,.18)}
+h1{flex:1;margin:0;font-size:23px;font-weight:500}
+header button{border:0;background:none;color:var(--tx);padding:8px;min-height:44px}
+button{font:inherit;color:var(--tx);background:none;border:1px solid var(--bd);border-radius:6px;padding:10px 14px;min-height:44px}
+button.p{background:var(--ac);color:#fff;border-color:var(--ac)}button.d{color:var(--dg)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+main{max-width:640px;margin:0 auto;padding:6px 14px 40px}
+.card{display:block;width:100%;text-align:left;margin:14px 0;padding:16px 20px;border:2px solid var(--bd);border-radius:0;background:var(--bg)}
+.card h2{margin:0 0 6px;font-size:25px}.card p{margin:12px 0;font-size:19px;overflow:hidden;text-overflow:ellipsis}
+.ph{color:var(--tx)}.mu,.empty{color:var(--mu)}.empty{text-align:center;padding:30px 8px}
+.c b{display:block;font-size:22px}.c span{display:block;font-size:17px;margin-top:4px}.c small{color:var(--mu)}
+.steps{display:flex;text-align:center}
+.s{position:relative;flex:1;font-size:17px}.s span{display:block;color:var(--ac);font-size:15px}.s b{display:block;font-weight:400;font-size:20px;margin-top:8px}.s small{color:var(--mu);font-size:15px}
+.s input{position:absolute;inset:0;width:100%;height:100%;opacity:0}
+.bar{height:6px;background:var(--bd);margin-top:14px}.bar i{display:block;height:100%;background:var(--tl)}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);margin:0 -2px}
+.tabs button{border:0;border-radius:0;color:var(--ac);font-size:22px;padding:16px 4px}.tabs .on{background:var(--on)}
+.ic{display:flex;justify-content:flex-end;gap:14px;margin-bottom:14px}
+.ic button{border:0;color:var(--ac);padding:4px;min-height:48px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px}
+.th{position:relative;aspect-ratio:1;padding:0;border:0;border-radius:0;overflow:hidden;background:var(--bd)}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.th i{position:absolute;left:3px;top:3px;right:3px;font:700 9px/1.2 sans-serif;font-style:normal;text-align:left;color:#ffa726;text-shadow:0 0 2px #000,0 0 2px #000}
+.row{display:flex;gap:8px;margin:12px 0}.row>*{flex:1}.row>input{flex:3}
+input[type=text],textarea{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--tx);margin:5px 0}
+textarea{min-height:80px}
+.li{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--bd)}.li>div{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}.li small{color:var(--mu);display:block}
+canvas{width:100%;height:auto;display:block}
+#menu{position:fixed;right:10px;top:calc(56px + env(safe-area-inset-top,0px));z-index:8;background:var(--bg);border:1px solid var(--bd);box-shadow:0 4px 14px rgba(0,0,0,.25);display:flex;flex-direction:column;min-width:200px}
+#menu button{border:0;border-radius:0;text-align:left}
+#toast{position:fixed;left:50%;top:76px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:8px 14px;border-radius:20px;font-size:14px;display:none;z-index:9}
+</style>
+</head>
+<body>
+<header><button id="back" hidden aria-label="Back"><svg width="28" height="28" viewBox="0 0 24 24"><path d="M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20z"/></svg></button><h1 id="ttl">Claims</h1><button id="mn" hidden aria-label="Menu"><svg width="28" height="28" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="19" r="2.2"/></svg></button></header>
+<div id="menu" hidden></div>
+<main id="app"></main>
+<div id="toast"></div>
+<input type="file" id="cam" accept="image/*" capture="environment" hidden>
+<input type="file" id="att" accept="image/*" multiple hidden>
+<input type="file" id="dfile" multiple hidden>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let db,S={v:'home'},geo,urls=[],tab='ref';
+const rq=r=>new Promise((a,b)=>{r.onsuccess=()=>a(r.result);r.onerror=()=>b(r.error)});
+const st=(n,m)=>db.transaction(n,m||'readonly').objectStore(n);
+const put=(n,o)=>rq(st(n,'readwrite').put(o)),add=(n,o)=>rq(st(n,'readwrite').add(o)),del=(n,i)=>rq(st(n,'readwrite').delete(i));
+const z=n=>String(n).padStart(2,'0');
+const fmt=t=>{const d=new Date(t);return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`};
+const sd=s=>s?new Date(s+'T00:00').toLocaleDateString('en',{month:'short',day:'numeric'}):'–';
+const CAM='<path fill-rule="evenodd" d="M9 3 7.2 5H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.2L15 3zm3 5a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>';
+const I={cam:`<svg width="48" height="48" viewBox="0 0 24 24">${CAM}</svg>`,pin:`<svg width="48" height="48" viewBox="0 0 24 24">${CAM}<path stroke="var(--bg)" stroke-width="1.3" d="M18 12.5a3.7 3.7 0 0 0-3.7 3.7c0 2.7 3.7 6.3 3.7 6.3s3.7-3.600 3.700-6.300A3.700 3.700 0 0 0 18 12.500z"/></svg>`,clip:'<svg width="48" height="48" viewBox="0 0 24 24"><path d="M21 11.5 12.500 20a5 5 0 0 1-7-7l9-9a3.300 3.300 0 0 1 4.700 4.700l-9 9a1.700 1.700 0 0 1-2.400-2.400l8-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'};
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2400)}
+function head(t,back,menu){$('#ttl').textContent=t;$('#back').hidden=!back;$('#back').onclick=back||null;$('#mn').hidden=!menu;$('#mn').onclick=menu||null;$('#menu').hidden=true;urls.forEach(URL.revokeObjectURL);urls=[]}
+const url=b=>{const u=URL.createObjectURL(b);urls.push(u);return u};
+function arm(btn,fn){const l=btn.textContent;let on=false;btn.onclick=()=>{if(!on){on=true;btn.textContent='Tap again to delete';setTimeout(()=>{on=false;btn.textContent=l},3000)}else fn()}}
+
+async function home(){
+  S={v:'home'};head('Claims');
+  const fs=await rq(st('folders').getAll()),ps=await rq(st('photos').getAll());
+  $('#app').innerHTML=`<div class="row"><input type="text" id="nf" placeholder="Vehicle number, e.g. KL 53 R 2583" aria-label="Vehicle number"><button class="p" id="mk">Create</button></div>`+
+  (fs.length?fs.sort((a,b)=>b.t-a.t).map(f=>`<button class="card c" data-id="${f.id}"><b>${esc(f.name)}</b><span>${esc(f.insurer)}</span><span>${esc(f.shop)}</span><small>${ps.filter(p=>p.folder===f.id&&p.kind!=='doc').length} photos</small></button>`).join(''):`<div class="empty">No claims yet. Add a vehicle number to start a survey.</div>`);
+  const mk=async()=>{const n=$('#nf').value.trim().toUpperCase();if(!n)return;const id=await add('folders',{name:n,t:Date.now(),d:['','','',''],cm:[]});folder(id)};
+  $('#mk').onclick=mk;$('#nf').onkeydown=e=>{if(e.key==='Enter')mk()};
+  document.querySelectorAll('.c').forEach(b=>b.onclick=()=>folder(+b.dataset.id));
+}
+
+async function folder(id){
+  S={v:'folder',fid:id};
+  const f=await rq(st('folders').get(id));if(!f)return home();
+  f.d=f.d||['','','',''];f.cm=f.cm||[];
+  head('Details',home,()=>{const m=$('#menu');m.hidden=!m.hidden});
+  const all=(await rq(st('photos').getAll())).filter(p=>p.folder===id).sort((a,b)=>b.t-a.t);
+  const ph=all.filter(p=>p.kind!=='doc'),dc=all.filter(p=>p.kind==='doc');
+  const v=(x,d)=>x?esc(x):d;
+  const labs=['Entrusted On','Survey Date','Bill Received','Submitted On'];
+  let body='';
+  if(tab==='ref')body=`<div class="ic"><button id="c1" aria-label="Take photo">${I.cam}</button><button id="c2" aria-label="Take photo with location">${I.pin}</button><button id="cl" aria-label="Attach photos">${I.clip}</button></div>`+(ph.length?`<div class="grid">${ph.map(p=>`<button class="th" data-id="${p.id}"><img src="${url(p.blob)}" alt="Photo"><i>${fmt(p.t)}<br>${esc(f.name)}${p.note?'<br>'+esc(p.note.slice(0,24)):''}</i></button>`).join('')}</div>`:'<div class="empty">No photos yet. Tap the camera to start.</div>');
+  if(tab==='doc')body=`<div class="ic"><button id="cd" aria-label="Attach document">${I.clip}</button></div>`+(dc.length?dc.map(d=>`<div class="li"><div>${esc(d.fname)}<small>${Math.max(1,Math.round(d.size/1024))} KB · ${fmt(d.t).slice(0,10)}</small></div><button data-o="${d.id}">Open</button><button class="d" data-x="${d.id}">Delete</button></div>`).join(''):'<div class="empty">No documents yet. Tap the clip to attach one.</div>');
+  if(tab==='cm')body=`<textarea id="ct" placeholder="Write a comment" aria-label="Comment"></textarea><div class="row"><button class="p" id="ca">Add comment</button></div>`+f.cm.slice().reverse().map((c,i)=>`<div class="li"><div>${esc(c.text)}<small>${fmt(c.t)}</small></div><button class="d" data-k="${f.cm.length-1-i}" aria-label="Remove comment">✕</button></div>`).join('');
+  $('#app').innerHTML=`<section class="card"><h2>${esc(f.name)}</h2><p>${v(f.model,'Vehicle Model')}</p><p>${v(f.insurer,'Insurer')}</p><p>${v(f.hub,'Claims hub')}</p><p>${v(f.shop,'Workshop')}</p></section>
+  <section class="card"><div class="steps">${labs.map((l,i)=>`<label class="s"><span>${l}</span><b>${sd(f.d[i])}</b>${i===1&&f.d[1]&&f.st?`<small>${f.st}</small>`:''}<input type="date" value="${f.d[i]}" data-i="${i}" aria-label="${l}"></label>`).join('')}</div><div class="bar"><i style="width:${f.d.filter(Boolean).length*25}%"></i></div></section>
+  <nav class="tabs">${[['ref','Reference'],['doc','Documents'],['cm','Comment']].map(([k,l])=>`<button class="${tab===k?'on':''}" data-t="${k}">${l}</button>`).join('')}</nav>
+  <section class="card">${body}</section>`;
+  const q=(s,fn)=>{const e=$(s);if(e)e.onclick=fn};
+  document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;folder(id)});
+  document.querySelectorAll('.s input').forEach(i=>i.onchange=async()=>{f.d[+i.dataset.i]=i.value;await put('folders',f);folder(id)});
+  document.querySelectorAll('.th').forEach(b=>b.onclick=()=>photo(+b.dataset.id));
+  q('#c1',()=>snap(false));q('#c2',()=>snap(true));q('#cl',()=>$('#att').click());q('#cd',()=>$('#dfile').click());
+  document.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{const d=dc.find(x=>x.id==b.dataset.o);share([new File([d.blob],d.fname,{type:d.blob.type})])});
+  document.querySelectorAll('[data-x]').forEach(b=>arm(b,async()=>{await del('photos',+b.dataset.x);folder(id)}));
+  q('#ca',async()=>{const t=$('#ct').value.trim();if(!t)return;f.cm.push({t:Date.now(),text:t});await put('folders',f);folder(id)});
+  document.querySelectorAll('[data-k]').forEach(b=>b.onclick=async()=>{f.cm.splice(+b.dataset.k,1);await put('folders',f);folder(id)});
+  $('#menu').innerHTML='<button id="m1">Edit details</button><button id="m2">Share all photos</button><button id="m3" class="d">Delete claim</button>';
+  $('#m1').onclick=()=>edit(f);
+  $('#m2').onclick=async()=>{$('#menu').hidden=true;toast('Preparing…');const fl=[];for(const p of ph.slice().reverse())fl.push(await file(p,f.name));fl.length?share(fl):toast('No photos to share')};
+  arm($('#m3'),async()=>{for(const p of all)await del('photos',p.id);await del('folders',id);home()});
+}
+
+function edit(f){
+  $('#menu').hidden=true;
+  const F=[['name','Vehicle number'],['model','Vehicle model'],['insurer','Insurer'],['hub','Claims hub'],['shop','Workshop']];
+  document.querySelector('.card').innerHTML=F.map(([k,l])=>`<input type="text" data-k="${k}" value="${esc(f[k])}" placeholder="${l}" aria-label="${l}">`).join('')+`<div class="row"><button class="p" id="sv">Save</button><button id="cn">Cancel</button></div>`;
+  $('#cn').onclick=()=>folder(f.id);
+  $('#sv').onclick=async()=>{document.querySelectorAll('.card [data-k]').forEach(i=>f[i.dataset.k]=i.value.trim());f.name=(f.name||'CLAIM').toUpperCase();await put('folders',f);folder(f.id)};
+}
+
+function warm(){geo=new Promise(r=>{if(!navigator.geolocation)return r(null);navigator.geolocation.getCurrentPosition(p=>r(p.coords),()=>r(null),{enableHighAccuracy:true,timeout:10000,maximumAge:5000})})}
+function snap(g){if(g)warm();else geo=Promise.resolve(null);$('#cam').click()}
+async function surveyStamp(id){const f=await rq(st('folders').get(id));if(f&&!(f.d&&f.d[1])){f.d=f.d||['','','',''];const n=new Date();f.d[1]=fmt(n).slice(0,10);f.st=n.toLocaleTimeString('en',{hour:'numeric',minute:'2-digit'});await put('folders',f)}}
+$('#cam').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  toast('Saving…');const c=await geo;
+  const id=await add('photos',{folder:S.fid,blob:f,t:Date.now(),lat:c?c.latitude:null,lon:c?c.longitude:null,acc:c?c.accuracy:null,note:''});
+  await surveyStamp(S.fid);photo(id,true);
+};
+$('#att').onchange=async e=>{const fl=[...e.target.files];e.target.value='';for(const f of fl)await add('photos',{folder:S.fid,blob:f,t:f.lastModified||Date.now(),lat:null,lon:null,acc:null,note:''});folder(S.fid)};
+$('#dfile').onchange=async e=>{const fl=[...e.target.files];e.target.value='';for(const f of fl)await add('photos',{folder:S.fid,kind:'doc',blob:f,fname:f.name,size:f.size,t:Date.now()});folder(S.fid)};
+
+function wrap(x,t,m){const o=[];for(const para of t.split('\n')){let l='';for(const w of para.split(' ')){const n=l?l+' '+w:w;if(x.measureText(n).width>m&&l){o.push(l);l=w}else l=n}o.push(l)}return o}
+async function stamp(p,name,max=1600){
+  const bm=await createImageBitmap(p.blob,{imageOrientation:'from-image'});
+  const k=Math.min(1,max/Math.max(bm.width,bm.height)),w=Math.round(bm.width*k),h=Math.round(bm.height*k);
+  const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(bm,0,0,w,h);
+  const fs=Math.max(12,Math.round(Math.min(w,h)/38));x.font=`700 ${fs}px sans-serif`;x.textBaseline='alphabetic';x.lineJoin='round';
+  const L=[fmt(p.t),name];if(p.lat!=null)L.push(`${p.lat.toFixed(6)}, ${p.lon.toFixed(6)} (±${Math.round(p.acc)} m)`);
+  if(p.note)L.push(...wrap(x,p.note,w-fs*2));
+  x.lineWidth=fs/5;L.forEach((l,i)=>{const y=fs*1.4+i*fs*1.25;x.strokeStyle='#000';x.strokeText(l,fs*.6,y);x.fillStyle='#ffa726';x.fillText(l,fs*.6,y)});
+  return c;
+}
+async function file(p,name){
+  const c=await stamp(p,name,2400),b=await new Promise(r=>c.toBlob(r,'image/jpeg',.9));
+  return new File([b],`${name.replace(/[^\w-]+/g,'_')}_${fmt(p.t).replace(/\D/g,'')}_${p.id}.jpg`,{type:'image/jpeg'});
+}
+async function share(files){
+  try{if(navigator.canShare&&navigator.canShare({files})){await navigator.share({files});return}}catch(e){if(e.name==='AbortError')return}
+  files.forEach(f=>{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.click()});
+  toast('If nothing saved, open this page in Chrome');
+}
+
+async function photo(id,fresh){
+  const p=await rq(st('photos').get(id));if(!p)return folder(S.fid);
+  const f=await rq(st('folders').get(p.folder));S={v:'photo',fid:p.folder};
+  head(f.name,()=>folder(p.folder));
+  $('#app').innerHTML=`<div id="cv" style="margin-top:14px"></div>
+  <p class="mu">${p.lat!=null?`Location: ${p.lat.toFixed(6)}, ${p.lon.toFixed(6)} (±${Math.round(p.acc)} m)`:'No location on this photo.'}</p>
+  <textarea id="nt" placeholder="Add a note (damage, part, observation)…" aria-label="Note">${esc(p.note)}</textarea>
+  <div class="row"><button class="p" id="sv">Save note</button><button id="sh">Share / save</button></div>
+  <div class="row">${fresh?'<button id="nx">Take another</button>':''}<button class="d" id="rm">Delete photo</button></div>`;
+  const draw=async()=>{$('#cv').replaceChildren(await stamp(p,f.name,1200))},sv=async()=>{p.note=$('#nt').value.trim();await put('photos',p)};
+  await draw();
+  $('#sv').onclick=async()=>{await sv();await draw();toast('Note saved')};
+  $('#sh').onclick=async()=>{await sv();share([await file(p,f.name)])};
+  if($('#nx'))$('#nx').onclick=async()=>{await sv();snap(p.lat!=null)};
+  arm($('#rm'),async()=>{await del('photos',id);folder(p.folder)});
+}
+
+(async()=>{
+  try{
+    db=await new Promise((a,b)=>{const r=indexedDB.open('surveycam',1);r.onupgradeneeded=()=>{const d=r.result;d.createObjectStore('folders',{keyPath:'id',autoIncrement:true});d.createObjectStore('photos',{keyPath:'id',autoIncrement:true})};r.onsuccess=()=>a(r.result);r.onerror=()=>b(r.error)});
+    home();
+  }catch(e){$('#app').innerHTML='<div class="empty">Storage is blocked in this browser. Open this page in Chrome.</div>'}
+})();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body>
+</html>
